@@ -1,0 +1,9 @@
+[Unit]
+Description=Podman prometheus exporter
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/podman_prometheus_exporter
+
+[Install]
+WantedBy=multi-user.target
