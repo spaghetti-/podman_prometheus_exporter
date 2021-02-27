@@ -134,15 +134,13 @@ func init() {
 	}
 }
 
-func getAllStats() ([]*define.ContainerStats, error) {
-	statOpts.NoStream = true
-	statOpts.All = true
-	statOpts.StatChan = make(chan []*define.ContainerStats, 1)
+func getAllStats() ([]define.ContainerStats, error) {
+	statOpts.Stream = false
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	err := registry.ContainerEngine().ContainerStats(
+	reports, err := registry.ContainerEngine().ContainerStats(
 		registry.Context(),
 		[]string{},
 		statOpts,
@@ -155,8 +153,8 @@ func getAllStats() ([]*define.ContainerStats, error) {
 		select {
 		case <-ctx.Done():
 			return nil, errors.New("deadline exceeded")
-		case s := <-statOpts.StatChan:
-			return s, nil
+		case s := <-reports:
+			return s.Stats, nil
 		}
 	}
 }
