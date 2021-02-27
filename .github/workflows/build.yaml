@@ -1,0 +1,33 @@
+name: Build
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout sources from SCM
+      uses: actions/checkout@v2
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.15.8'
+    - name: Install dependencies
+      run: |
+        sudo apt-get install -y libdevmapper-dev libgpgme-dev libbtrfs-dev
+        go version
+        go get -u golang.org/x/lint/golint
+    - name: Run build
+      run: GOOS=linux GOARCH=amd64 go build -o podman_prometheus_exporter ./main.go
+    - name: Run vet & lint
+      run: |
+        go vet .
+        golint .
+    - name: Run tests
+      run: go test -v
