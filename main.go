@@ -129,13 +129,13 @@ func NewCollector() *Collector {
 func init() {
 	_ = registry.PodmanConfig()
 	_, err := registry.NewContainerEngine(&cobra.Command{}, []string{})
+	statOpts.Stream = false
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func getAllStats() ([]define.ContainerStats, error) {
-	statOpts.Stream = false
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
