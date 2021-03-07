@@ -129,20 +129,18 @@ func NewCollector() *Collector {
 func init() {
 	_ = registry.PodmanConfig()
 	_, err := registry.NewContainerEngine(&cobra.Command{}, []string{})
+	statOpts.Stream = false
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func getAllStats() ([]*define.ContainerStats, error) {
-	statOpts.NoStream = true
-	statOpts.All = true
-	statOpts.StatChan = make(chan []*define.ContainerStats, 1)
+func getAllStats() ([]define.ContainerStats, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	err := registry.ContainerEngine().ContainerStats(
+	reports, err := registry.ContainerEngine().ContainerStats(
 		registry.Context(),
 		[]string{},
 		statOpts,
@@ -155,8 +153,8 @@ func getAllStats() ([]*define.ContainerStats, error) {
 		select {
 		case <-ctx.Done():
 			return nil, errors.New("deadline exceeded")
-		case s := <-statOpts.StatChan:
-			return s, nil
+		case s := <-reports:
+			return s.Stats, nil
 		}
 	}
 }
